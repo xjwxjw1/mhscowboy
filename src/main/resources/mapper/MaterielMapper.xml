@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.mutong.mhscowboy.mapper.MaterielMapper">
+	<!-- 添加物料信息 -->
+	<insert id="insert">
+		insert into t_materiel (matnum,name,unit,num,created_user,created_time,
+		modified_user,modified_time)values(
+		#{matnum},#{name},#{unit},#{num},#{createdUser},
+		#{createdTime},#{modifiedUser},#{modifiedTime}
+		)
+	</insert>
+	
+	<select id="findByMatnum" resultType="com.mutong.mhscowboy.entity.Materiel">
+		select mid,name,unit,num from t_materiel where matnum=#{matnum}
+	</select>
+	
+	<!-- 查询所有物料信息 -->
+	<select id="findAll" resultType="com.mutong.mhscowboy.entity.Materiel">
+		select mid,matnum,name,unit,num,created_user createdUser,created_time createdTime
+		from t_materiel
+	</select>
+	
+	<!-- 根据mid查询物料信息 -->
+	<select id="findByMid" resultType="com.mutong.mhscowboy.entity.Materiel">
+		select matnum,name,unit,num from t_materiel where mid=#{mid}
+	</select>
+	
+	<!-- 根据用户输入的关键字模糊查询 -->
+	<select id="findByParameter" resultType="com.mutong.mhscowboy.entity.Materiel">
+		select mid,matnum,name,unit,num,created_user createdUser,created_time createdTime
+		from t_materiel where name like "%"#{parameter}"%"
+	</select>
+	
+	<!-- 根据物料id更改物料信息 -->
+	<update id="updateByMid">
+		update t_materiel set matnum=#{matnum},name=#{name},unit=#{unit},num=#{num},
+		modified_user=#{modifiedUser},modified_time=#{modifiedTime}
+		where mid=#{mid}
+	</update>
+	
+	<!-- 根据物料id删除此条记录 -->
+	<delete id="delete">
+		delete from t_materiel where mid=#{mid}
+	</delete>
+</mapper>
+
+
+
+
+
+

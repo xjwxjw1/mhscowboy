@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.mutong.mhscowboy.mapper.UserMapper">
+	
+	<!-- 插入用户数据 -->
+	<!-- Integer insert(User user) -->
+	<insert id="insertUser">
+		INSERT INTO t_user (
+			username, password,
+			salt, name,
+			gender,phone, 
+			email,dept_no, root,
+			created_user, created_time,
+			modified_user, modified_time
+		) VALUES (
+			#{username}, #{password},
+			#{salt}, #{name},
+			#{gender},#{phone}, 
+			#{email},#{deptno},#{root},
+			#{createdUser}, #{createdTime},
+			#{modifiedUser}, #{modifiedTime}
+		)
+	</insert>
+	
+	<!-- 根据用户名查询用户数据 -->
+	<select id="findByUsername"
+		resultType="com.mutong.mhscowboy.entity.User">
+		SELECT 
+			uid,username,
+			name,password,salt
+		FROM 
+			t_user 
+		WHERE 
+			username=#{username}
+	</select>
+	
+	<!-- 更新用户密码 -->
+	<update id="updatePassword">
+		UPDATE 
+			t_user 
+		SET 
+			password=#{newPassword}, 
+			modified_user=#{modifiedUser}, 
+			modified_time=#{modifiedTime} 
+		WHERE 
+			uid=#{uid}
+	</update>
+	
+	<!-- 根据用户id查询用户数据 -->
+	<select id="findByUid" resultType="com.mutong.mhscowboy.entity.User">
+		SELECT 
+			username, phone,
+			email, gender,name,
+			password, salt,root,dept_no deptno
+		FROM 
+			t_user 
+		WHERE 
+			uid=#{uid}
+	</select>
+	
+	<!-- 查询所有用户 -->
+	<select id="findUser" resultType="com.mutong.mhscowboy.vo.UserVO">
+		select uid,name,gender,email,phone,deptname 
+		from t_user join t_deptno on t_user.dept_no=t_deptno.did 
+		order by dept_no,uid
+	</select>
+
+	<!-- 根据用户id修改用户信息 -->
+	<update id="updateInfo">
+		update t_user set name=#{name},gender=#{gender},
+		email=#{email},phone=#{phone},
+		modified_user=#{modifiedUser},modified_time=#{modifiedTime}
+		where uid=#{uid}
+	</update>
+	
+	<!-- 根据用户id删除此条记录 -->
+	<delete id="delete">
+		delete from t_user where uid=#{uid}
+	</delete>
+	
+	<!-- 模糊查询 根据用户输入的字母查询匹配的姓名用户 -->
+	<select id="findByLetter" resultType="com.mutong.mhscowboy.vo.UserVO">
+		select uid,name,gender,email,phone,deptname 
+		from t_user join t_deptno on t_user.dept_no=t_deptno.did 
+		where name like "%"#{parameter}"%"
+	</select>
+	
+	<select id="findByDeptno" resultType="java.lang.Integer">
+		select count(*) from t_user where dept_no=#{deptno}
+	</select>
+</mapper>
+
+
+
+
+
+

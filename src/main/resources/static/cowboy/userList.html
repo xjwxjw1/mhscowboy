@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>牧童仓库管理系统</title>
+    <link rel="stylesheet" href="css/public.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/js.js"></script>
+    <script src="js/jquery.js"></script>	
+    <script src="../js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<!--头部-->
+    <header class="publicHeader">
+        <h1>牧童仓库管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" id="span-1"> </span> , 欢迎你！</p>
+            <input type="button" value="退出" onclick="exit()">
+        </div>
+    </header>
+<!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+    </section>
+<!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li><a href="projectList.html">项目管理</a></li>
+                    <li><a href="supplierList.html">供应商管理</a></li>
+                    <li  id="active"><a href="userList.html">用户管理</a></li>
+                    <li><a href="password.html">密码修改</a></li>
+                    <li><a href="materiel.html">物料管理</a></li>
+                    <li><a href="deptList.html">部门管理</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>用户管理页面</span>
+            </div>
+            <div class="search" id="update">
+                <span>用户名：</span>
+                <input type="text" placeholder="请输入姓名关键字"/>
+                <input id="select-btn" type="button" value="查询"/>
+            </div>
+            <!--用户-->
+            <table class="providerTable" cellpadding="0" cellspacing="0" id="user-list">
+                <tr class="firstTr">
+                    <th width="10%">用户编码</th>
+                    <th width="20%">用户姓名</th>
+                    <th width="10%">性别</th>
+                    <th width="10%">邮箱</th>
+                    <th width="10%">电话</th>
+                    <th width="10%">部门</th>
+                    <th width="30%">操作</th>
+                </tr>        
+            </table>
+        </div>
+    </section>
+
+<!--点击删除按钮后弹出的页面-->
+<div class="zhezhao"></div>
+<div class="remove" id="removeUse">
+    <div class="removerChid">
+        <h2>提示</h2>
+        <div class="removeMain">
+            <p>你确定要删除该用户吗？</p>
+            <a href="#" id="yes">确定</a>
+            <a href="#" id="no">取消</a>
+        </div>
+    </div>
+</div>
+
+    <footer class="footer">
+    </footer>
+<script src="js/time.js"></script>
+<script type="text/javascript">
+	var uid;
+	var username;
+	$(document).ready(function(){
+		username = $.cookie("username");
+		$("#span-1").html(username);		
+		uid = $.cookie("uid");
+		showUserList();
+	})
+	
+	function showUserList(){
+		$.ajax({
+			"url":"/user/userList",
+			"type":"get",
+			"dataType":"json",
+			"success":function(json){
+				if(json.state==200){
+					$("#update").empty();					
+					var html = '<span>用户名：</span>'
+		               		+'<input id="select-text" type="text" placeholder="请输入姓名关键字"/>'
+		               		+'<input onclick=selectUser() type="button" value="查询"/>'
+		               		+'<input onclick=downloadUser() type="button" value="导出Excel"/>'
+		               		+'<a href="userUpdate.html?uid=#{uid}">修改个人资料</a>';
+					html = html.replace(/#{uid}/g,uid);
+					$("#update").append(html);
+					var list = json.data;
+					$("#user-list").empty();
+					var html1 = '<tr class="firstTr">'
+								 +'<th width="10%">用户编码</th>'
+								 +'<th width="20%">用户姓名</th>'
+								 +'<th width="10%">性别</th>'
+								 +'<th width="10%">邮箱</th>'
+								 +'<th width="10%">电话</th>'
+								 +'<th width="10%">部门</th>'
+								 +'<th width="30%">操作</th>'
+					 			 +'</tr>'
+					$("#user-list"). append(html1);
+					for(var i=0;i<list.length;i++){
+						var html='<tr>'
+	                  		 +'<td>#{uid}</td>'
+	                  		 +'<td>#{name}</td>'
+	                  		 +'<td>#{gender}</td>'
+	                  		 +'<td>#{email}</td>'
+	                  		 +'<td>#{phone}</td>'
+	                  		 +'<td>#{deptno}</td>'
+	                  		 +'<td>'
+	                  		 +'<img src="img/schu.png" alt="删除"  onclick=deleteUser(#{uid}) />'
+	                  		 +'</td>'
+	                  		 +'</tr>';	  
+	                  	html = html.replace(/#{uid}/g,list[i].uid);
+	                  	html = html.replace(/#{name}/g,list[i].name);
+	                  	html = html.replace(/#{gender}/g,list[i].gender=="0"?"女":"男");
+	                  	html = html.replace(/#{email}/g,list[i].email);
+	                  	html = html.replace(/#{phone}/g,list[i].phone);	                  	
+	                  	html = html.replace(/#{deptno}/g,list[i].deptname);
+	                  	$("#user-list").append(html);
+					}           
+				}
+			}
+		})
+	}
+	
+	function deleteUser(uid){
+		$.ajax({
+			"url":"/user/" + uid + "/delete",
+			"type":"POST",
+			"dataType":"json",
+			"success":function(json) {
+				if (json.state == 200) {
+					showUserList();
+				} else {
+					alert(json.message);
+				}
+			},
+			"error":function() {
+				alert("您的登录信息已经过期，请重新登录！");
+				location.href = "login.html";
+			}
+		});
+	}
+	
+	function selectUser(){
+		var parameter = $("#select-text").val();
+		if(parameter.length==0){
+			alert("请输入查询关键字");
+			return;
+		}
+		$.ajax({
+			"url":"/user/"+parameter+"/select",
+			"type":"get",
+			"dataType":"json",
+			"success":function(json){
+				if(json.state==200){
+					$("#select-text").val("");
+					$("#user-list").empty();
+					var html1 = '<tr class="firstTr">'
+								 +'<th width="10%">用户编码</th>'
+								 +'<th width="20%">用户姓名</th>'
+								 +'<th width="10%">性别</th>'
+								 +'<th width="10%">邮箱</th>'
+								 +'<th width="10%">电话</th>'
+								 +'<th width="10%">部门</th>'
+								 +'<th width="30%">操作</th>'
+					 			 +'</tr>'
+					$("#user-list"). append(html1);
+					var list = json.data;
+					for(var i=0;i<list.length;i++){
+						var html='<tr>'
+	                  		 +'<td>#{uid}</td>'
+	                  		 +'<td>#{name}</td>'
+	                  		 +'<td>#{gender}</td>'
+	                  		 +'<td>#{email}</td>'
+	                  		 +'<td>#{phone}</td>'
+	                  		 +'<td>#{deptno}</td>'
+	                  		 +'<td>'
+	                  		 +'<img src="img/schu.png" alt="删除"  onclick=deleteUser(#{uid}) />'
+	                  		 +'</td>'
+	                  		 +'</tr>';	  
+	                  	html = html.replace(/#{uid}/g,list[i].uid);
+	                  	html = html.replace(/#{name}/g,list[i].name);
+	                  	html = html.replace(/#{gender}/g,list[i].gender=="0"?"女":"男");
+	                  	html = html.replace(/#{email}/g,list[i].email);
+	                  	html = html.replace(/#{phone}/g,list[i].phone);	                  	
+	                  	html = html.replace(/#{deptno}/g,list[i].deptname);
+	                  	$("#user-list").append(html);
+					}
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+	function deptList(){
+		location.href="deptList.html";
+	}
+	
+	function exit(){
+		$.ajax({
+			"url":"/user/exit",
+			"datatype":"json",
+			"type":"post",
+			"success":function(json){
+				if(json.state==200){
+					location.href="login.html"
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+ 	function downloadUser(){
+		location.href="/user/download";
+	} 
+</script>
+</body>
+</html>

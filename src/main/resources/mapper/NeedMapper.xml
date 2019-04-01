@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.mutong.mhscowboy.mapper.NeedMapper">
+	<!-- 添加物料需求计划信息 -->
+	<insert id="insert">
+		insert into t_need (matnum,name,person,time,demand,auditing, pro_id,
+		created_user,created_time,modified_user,modified_time
+		)values(
+		#{matnum},#{name},#{person},#{time},#{demand},#{auditing},#{proId},
+		#{createdUser},#{createdTime},#{modifiedUser},#{modifiedTime}
+		)
+	</insert>
+	
+	<!-- 根据所属项目id和物料编号查询是否重复 -->
+	<select id="findByMatnumAndProId" resultType="com.mutong.mhscowboy.entity.Need">
+		select nid,matnum,auditing from t_need where matnum=#{matnum} and pro_id=#{proId}
+	</select>
+	
+	<!-- 根据项目id查询相关的物料需求集合 -->
+	<select id="findAllByPid" resultType="com.mutong.mhscowboy.entity.Need">
+		select nid,matnum,name,person,time,demand,auditing from t_need where pro_id=#{proId}
+	</select>
+	
+	<!-- 根据用户输入的关键词查询相关物料需求信息 -->
+	<select id="findByParameter" resultType="com.mutong.mhscowboy.entity.Need">
+		select nid,matnum,name,person,time,demand,auditing 
+		from t_need where name like "%"#{parameter}"%" and pro_id=#{proId}
+	</select>
+	
+	<!-- 根据物料需求id查找相关的信息 -->
+	<select id="findByNid" resultType="com.mutong.mhscowboy.entity.Need">
+		select nid,matnum,name,person,time,demand,created_user createdUser
+		from t_need where nid=#{nid}
+	</select>
+	
+	<!-- 根据物料需求id更改物料需求信息 -->
+	<update id="updateByNid">
+		update t_need set matnum=#{matnum},name=#{name},person=#{person},
+		time=#{time},demand=#{demand},modified_user=#{modifiedUser},
+		modified_time=#{modifiedTime} where nid=#{nid}
+	</update>
+	
+	<!-- 根据物料需求id删除对应的记录 -->
+	<delete id="deleteByNid">
+		delete from t_need where nid=#{nid}
+	</delete>
+	
+	<!-- 根据物料需求id更改审核状态 -->
+	<update id="updateDemand">
+		update t_need set auditing="审核完成" where nid=#{nid}
+	</update>
+</mapper>
+
+
+
+
+
+

@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>牧童仓库管理系统</title>
+    <link rel="stylesheet" href="css/public.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/jquery.js"></script>
+	<script src="js/js.js"></script>
+	<script src="js/time.js"></script>
+	<script src="../js/jquery-1.9.1.min.js"></script>
+    <script src="../js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<!--头部-->
+    <header class="publicHeader">
+        <h1>牧童仓库管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span id="span-1" style="color: #fff21b"></span> , 欢迎你！</p>
+            <input type="button" value="退出" onclick="exit()">
+        </div>
+    </header>
+<!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+    </section>
+<!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li id="active"><a href="ProjectList.html">项目管理</a></li>
+                    <li><a href="supplierList.html">供应商管理</a></li>
+                    <li><a href="userList.html">用户管理</a></li>
+                    <li><a href="password.html">密码修改</a></li>
+                    <li><a href="materiel.html">物料管理</a></li>
+                    <li><a href="deptList.html">部门管理</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>物料管理页面</span>
+            </div>
+            <div class="search">
+                <span>商品名称：</span>
+                <input id="select-text" type="text" placeholder="请输入物料名称"/>
+                
+               
+
+                <input type="button" value="查询" onclick="selectMateriel(parameter)"/>
+                <input onclick="downloadMateriel()" type="button" value="导出Excel"/>
+                <a href="materielAdd.html">添加物料</a>
+            </div>
+            <!--账单表格 样式和供应商公用-->
+            <table id="materiel-tab" class="providerTable" cellpadding="0" cellspacing="0">
+                <tr class="firstTr">
+                    <th width="10%">项目编号</th>
+                    <th width="20%">项目方</th>
+                    <th width="10%">项目名</th>
+                    <th width="10%">下单时间</th>
+                    <th width="10%">项目负责人</th>
+                    <th width="10%">修改执行人</th>
+                    <th width="30%">操作</th>
+                </tr>
+                <tr>
+                    <td>213</td>
+                    <td>123</td>
+                    <td>北京市粮油总公司</td>
+                    <td>22.00</td>
+                    <td>未付款</td>
+                    <td>2015-11-12</td>
+                    <td>
+                        <a href="billView.html"><img src="img/read.png" alt="查看" title="查看"/></a>
+                        <a href="billUpdate.html"><img src="img/xiugai.png" alt="修改" title="修改"/></a>
+                        <a href="#" class="removeBill"><img src="img/schu.png" alt="删除" title="删除"/></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+<!--点击删除按钮后弹出的页面-->
+<div class="zhezhao"></div>
+<div class="remove" id="removeBi">
+    <div class="removerChid">
+        <h2>提示</h2>
+        <div class="removeMain">
+            <p>你确定要删除该订单吗？</p>
+            <a href="#" id="yes">确定</a>
+            <a href="#" id="no">取消</a>
+        </div>
+    </div>
+</div>
+
+    <footer class="footer">
+    </footer>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var username = $.cookie("username");
+		$("#span-1").html(username);
+		$("#h-1").html(username);	
+		showMaterielList();
+	})
+	
+	function showMaterielList(){
+		$.ajax({
+			"url":"/materiel/",
+			"type":"get",
+			"dataType":"json",
+			"success":function(json){
+				if(json.state==200){
+					$("#materiel-tab").empty();
+					var html = '<tr class="firstTr">'
+                  			  +'<th width="10%">物料编号</th>'
+                  			+'<th width="20%">物料名</th>'
+                  			+'<th width="20%">计量单位</th>'
+                  			+'<th width="10%">库存</th>'
+                  			+'<th width="10%">创建人</th>'
+                  			+'<th width="10%">创建时间</th>'
+                  			+'<th width="20%">操作</th>'
+                  			+'</tr>'
+                  	$("#materiel-tab").append(html);
+                  	var list = json.data;
+                  	for(var i=0;i<list.length;i++){
+                  		var html = '<tr>'
+                  				+'<td>#{matnum}</td>'
+                  				+'<td>#{name}</td>'
+                  				+'<td>#{unit}</td>'
+                  				+'<td>#{num}</td>'
+                  				+'<td>#{createdUser}</td>'
+                  				+'<td>#{createdTime}</td>'
+                  				+'<td>'
+                  				+'<a href="materielUpdate.html?mid=#{mid}"><img src="img/xiugai.png" alt="修改/删除" title="修改/删除"/></a>'
+                  				+'</td>'
+                  				+'</tr>'
+                  		html = html.replace(/#{mid}/g,list[i].mid);
+	                  	html = html.replace(/#{matnum}/g,list[i].matnum);
+	                  	html = html.replace(/#{name}/g,list[i].name);
+	                  	html = html.replace(/#{unit}/g,list[i].unit);
+	                  	html = html.replace(/#{num}/g,list[i].num);
+	                  	html = html.replace(/#{createdUser}/g,list[i].createdUser);
+	                  	html = html.replace(/#{createdTime}/g,list[i].createdTime.substring(0,10));
+	                  	$("#materiel-tab").append(html);
+                  	}
+					}else{
+						alert(json.message);
+					}
+				}
+			})
+	}
+	var parameter;
+	function selectMateriel(parameter){
+		parameter = $("#select-text").val();
+		if(parameter.length<1){
+			alert("请输入关键字查询");
+			return;
+		}
+		$.ajax({
+			"url":"/materiel/"+parameter+"/find",
+			"type":"get",
+			"dataType":"json",
+			"success":function(json){
+				$("#select-text").val("");
+				if(json.state==200){
+					$("#materiel-tab").empty();
+					var html = '<tr class="firstTr">'
+            			  +'<th width="10%">物料编号</th>'
+                			+'<th width="20%">物料名</th>'
+                			+'<th width="20%">计量单位</th>'
+                			+'<th width="10%">库存</th>'
+                			+'<th width="10%">创建人</th>'
+                			+'<th width="10%">创建时间</th>'
+                			+'<th width="20%">操作</th>'
+                			+'</tr>'
+                  	$("#materiel-tab").append(html);
+                  	var list = json.data;
+					for(var i=0;i<list.length;i++){
+                  		var html = '<tr>'
+                  				+'<td>#{matnum}</td>'
+                  				+'<td>#{name}</td>'
+                  				+'<td>#{unit}</td>'
+                  				+'<td>#{num}</td>'
+                  				+'<td>#{createdUser}</td>'
+                  				+'<td>#{createdTime}</td>'
+                  				+'<td>'
+                  				+'<a href="materielUpdate.html?pid=#{mid}"><img src="img/xiugai.png" alt="修改/删除" title="修改/删除"/></a>'
+                  				+'</td>'
+                  				+'</tr>'
+                  		html = html.replace(/#{mid}/g,list[i].mid);
+                  		html = html.replace(/#{matnum}/g,list[i].matnum);
+	                  	html = html.replace(/#{name}/g,list[i].name);
+	                  	html = html.replace(/#{unit}/g,list[i].unit);
+	                  	html = html.replace(/#{num}/g,list[i].num);
+	                  	html = html.replace(/#{createdUser}/g,list[i].createdUser);
+	                  	html = html.replace(/#{createdTime}/g,list[i].createdTime.split("T0")[0]);
+	                  	$("#materiel-tab").append(html);
+				}
+			}else{
+				alert(json.message)
+			}
+		}
+	})
+}
+	function exit(){
+		$.ajax({
+			"url":"/user/exit",
+			"datatype":"json",
+			"type":"post",
+			"success":function(json){
+				if(json.state==200){
+					location.href="login.html"
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+	function downloadMateriel(){
+		location.href="/materiel/download";
+	}
+</script>
+
+</body>
+</html>

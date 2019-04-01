@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>牧童仓库管理系统</title>
+    <link rel="stylesheet" href="css/public.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/js.js"></script>
+    <script src="js/jquery.js"></script>	
+    <script src="../js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<!--头部-->
+    <header class="publicHeader">
+        <h1>牧童仓库管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" id="span-1"> </span> , 欢迎你！</p>
+            <input type="button" value="退出" onclick="exit()">
+        </div>
+    </header>
+<!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+    </section>
+<!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li><a href="projectList.html">项目管理</a></li>
+                    <li><a href="supplierList.html">供应商管理</a></li>
+                    <li  id="active"><a href="userList.html">用户管理</a></li>
+                    <li><a href="password.html">密码修改</a></li>
+                    <li><a href="materiel.html">物料管理</a></li>
+                    <li><a href="deptList.html">部门管理</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>部门管理页面</span>
+            </div>
+            <div class="search">
+                <input onclick="downloadDeptno()" type="button" value="导出Excel"/>
+                <a href="supplierAdd.html">添加供应商</a>
+            </div>
+            <!--用户-->
+            <table class="providerTable" cellpadding="0" cellspacing="0" id="dept-list">
+                <tr class="firstTr">
+                    <th width="10%">部门编码</th>
+                    <th width="20%">部门名字</th>
+                    <th width="10%">性别</th>
+                    <th width="10%">邮箱</th>
+                    <th width="10%">电话</th>
+                    <th width="10%">部门</th>
+                    <th width="30%">操作</th>
+                </tr>        
+            </table>
+        </div>
+    </section>
+
+<!--点击删除按钮后弹出的页面-->
+<div class="zhezhao"></div>
+<div class="remove" id="removeUse">
+    <div class="removerChid">
+        <h2>提示</h2>
+        <div class="removeMain">
+            <p>你确定要删除该用户吗？</p>
+            <a href="#" id="yes">确定</a>
+            <a href="#" id="no">取消</a>
+        </div>
+    </div>
+</div>
+
+    <footer class="footer">
+    </footer>
+<script src="js/time.js"></script>
+<script type="text/javascript">
+	var uid;
+	var username;
+	$(document).ready(function(){
+		username = $.cookie("username");
+		$("#span-1").html(username);		
+		uid = $.cookie("uid");
+		showUserList();
+	})
+	
+	function showUserList(){
+		$.ajax({
+			"url":"/dept/",
+			"type":"get",			
+			"dataType":"json",
+			"success":function(json){
+				var count=0;
+				if(json.state==200){
+					var list = json.data;
+					$("#dept-list").empty();
+					var html1 = '<tr class="firstTr">'
+								 +'<th width="10%">部门编码</th>'
+								 +'<th width="20%">部门名字</th>'
+								 +'<th width="10%">部门领导</th>'
+								 +'<th width="10%">部门人数</th>'
+								 +'<th width="10%">创建人</th>'
+								 +'<th width="10%">创建时间</th>'
+								 +'<th width="30%">操作</th>'
+					 			 +'</tr>'
+					$("#dept-list"). append(html1);
+					for(var i=0;i<list.length;i++){
+						var html='<tr>'
+	                  		 +'<td>#{did}</td>'
+	                  		 +'<td>#{deptname}</td>'
+	                  		 +'<td>#{mgr}</td>'
+	                  		 +'<td>#{count}</td>'
+	                  		 +'<td>#{createUser}</td>'
+	                  		 +'<td>#{createTime}</td>'
+	                  		 +'<td>'
+	                  		 +'<img src="img/schu.png" alt="删除"  onclick=deleteDept(#{did}) />'
+	                  		 +'</td>'
+	                  		 +'</tr>';	  
+	                  	 $.ajax({
+	                  			 "url":"/user/"+list[i].did+"/deptno",
+							     "type":"get",
+							     "async": false,
+								 "dataType":"json",
+								 "success":function(json){
+									 if(json.state==200){
+										 count=json.data;
+									 }else{
+										 alert(json.message);
+									 }
+								 }
+	                  		 })		
+	                  	html = html.replace(/#{did}/g,list[i].did);
+		                html = html.replace(/#{deptname}/g,list[i].deptname);
+		                html = html.replace(/#{mgr}/g,list[i].mgr);
+		                html = html.replace(/#{count}/g,count);
+		                html = html.replace(/#{createUser}/g,null);	                 	
+		                html = html.replace(/#{createTime}/g,null);
+		                $("#dept-list").append(html);
+					}  
+				}
+			}
+		})
+	}
+
+	
+	function deleteDept(did){
+		$.ajax({
+			"url":"/dept/" + did + "/delete",
+			"type":"POST",
+			"dataType":"json",
+			"success":function(json) {
+				if (json.state == 200) {
+					showUserList();
+				} else {
+					alert(json.message);
+				}
+			},
+			"error":function() {
+				alert("您的登录信息已经过期，请重新登录！");
+				location.href = "login.html";
+			}
+		});
+	}
+	
+	function exit(){
+		$.ajax({
+			"url":"/user/exit",
+			"datatype":"json",
+			"type":"post",
+			"success":function(json){
+				if(json.state==200){
+					location.href="login.html"
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+	function downloadDeptno(){
+		location.href="/dept/download";
+	}
+</script>
+</body>
+</html>

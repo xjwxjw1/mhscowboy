@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.mutong.mhscowboy.mapper.ProjectMapper">
+	<!-- 插入项目数据 -->
+	<insert id="insert">
+		insert into t_project (
+		pronum,applicant,name,time,person,created_user,created_time,modified_user,modified_time
+		)values(
+		#{pronum},#{applicant},#{name},#{time},#{person},
+		#{createdUser},#{createdTime},#{modifiedUser},#{modifiedTime}
+		)
+	</insert>
+	
+	<!-- 根据项目编号查询是否已经存在 -->
+	<select id="findByPronum" resultType="com.mutong.mhscowboy.entity.Project">
+		select pid,person from t_project where pronum=#{pronum}
+	</select>
+	
+	<!-- 查询所有项目信息 -->
+	<select id="findAllProject" resultType="com.mutong.mhscowboy.entity.Project">
+		select pid,pronum,applicant,name,time,person,modified_user modifiedUser from t_project
+	</select>
+	
+	<!-- 模糊查询 根据用户输入的参数查询 -->
+	<select id="findByParameter" resultType="com.mutong.mhscowboy.entity.Project">
+		select pid,pronum,applicant,name,time,person,modified_user modifiedUser 
+		from t_project where name like "%"#{name}"%"
+	</select>
+	
+	<!-- 根据项目id修改项目信息 -->
+	<update id="updateByPid">
+		update t_project set pronum=#{pronum},applicant=#{applicant},name=#{name},
+		time=#{time},person=#{person},modified_user=#{modifiedUser} where pid=#{pid}
+	</update>
+	
+	<select id="findByPid" resultType="com.mutong.mhscowboy.entity.Project">
+		select pronum,applicant,name,time,person,created_user createdUser 
+		from t_project where pid=#{pid}
+	</select>
+	
+	<!-- 根据项目id删除当前项目 -->
+	<delete id="deleteByPid">
+		delete from t_project where pid=#{pid}
+	</delete>
+</mapper>
+
+
+
+
+
+

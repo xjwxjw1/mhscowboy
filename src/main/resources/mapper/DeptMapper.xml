@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.mutong.mhscowboy.mapper.DeptMapper">
+	<!-- 查询所有部门信息 -->
+	<select id="findAllDept" resultType="com.mutong.mhscowboy.entity.Dept">
+		select did,deptname,mgr from t_deptno
+	</select>
+	
+	<!-- 根据部门id查询 -->
+	<select id="findByDid" resultType="com.mutong.mhscowboy.entity.Dept">
+		select did,deptname,mgr from t_deptno where did=#{did}
+	</select>
+	
+	<!-- 根据部门id删除当前部门记录 -->
+	<delete id="deleteByDeptno">
+		delete from t_deptno where did=#{did}
+	</delete>
+</mapper>
+
+
+
+
+
+

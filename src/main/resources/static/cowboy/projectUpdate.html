@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>牧童仓库管理系统</title>
+    <link rel="stylesheet" href="css/public.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<!--头部-->
+<header class="publicHeader">
+    <h1>牧童仓库管理系统</h1>
+
+    <div class="publicHeaderR">
+        <p><span>下午好！</span><span style="color: #fff21b" id="span-1"></span> , 欢迎你！</p>
+        <input type="button" value="退出" onclick="exit()">
+    </div>
+</header>
+<!--时间-->
+<section class="publicTime">
+    <span id="time">2015年1月1日 11:11  星期一</span>
+</section>
+<!--主体内容-->
+<section class="publicMian ">
+    <div class="left">
+        <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+        <nav>
+            <ul class="list">
+                <li id="active"><a href="projectList.html">项目管理</a></li>
+                <li><a href="supplierList.html">供应商管理</a></li>
+                <li><a href="userList.html">用户管理</a></li>
+                <li><a href="password.html">密码修改</a></li>
+                <li><a href="materiel.html">物料管理</a></li>
+                <li><a href="deptList.html">部门管理</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="right">
+        <div class="location">
+            <strong>你现在所在的位置是:</strong>
+            <span>项目管理页面 >> 项目修改页面</span>
+        </div>
+        <div class="providerAdd">
+            <form id="project-update-form">
+                <!--div的class 为error是验证错误，ok是验证成功-->
+                <div class="">
+                    <label for="providerId">项目编码：</label>
+                    <input type="text" name="pronum" id="providerId" />
+                    <span>*</span>
+                </div>
+                <div>
+                    <label for="providerName">项目方：</label>
+                    <input type="text" name="applicant" id="providerName" />
+                    <span >*</span>
+                </div>
+                <div>
+                    <label for="people">项目名：</label>
+                    <input type="text" name="name" id="people" />
+                    <span>*</span>
+
+                </div>
+                <div>
+                    <label for="phone">下单时间：</label>
+                    <input type="text" name="time" id="phone" />
+                    <span>*</span>
+                </div>
+                <div>
+                    <label for="address">项目负责人：</label>
+                    <input type="text" name="person" id="address" />
+                    <span>*</span>
+                </div>
+                
+                <div class="providerAddBtn" id="del-btn">
+                    <!--<a href="#">保存</a>-->
+                    <!--<a href="billList.html">返回</a>-->
+                    <input type="button" value="保存" onclick="updateProject(pid)"/>
+                    
+                </div>
+            </form>
+        </div>
+
+    </div>
+</section>
+<footer class="footer">
+</footer>
+<script src="js/time.js"></script>
+<script src="../js/jquery-1.9.1.min.js"></script>
+<script src="../js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	var pid;
+	$(document).ready(function(){
+		var username = $.cookie("username");
+		$("#span-1").html(username);
+		$("#h-1").html(username);	
+		pid = window.location.search.split("=")[1];
+		var html = '<input type="button" value="删除" onclick="deleteProject(#{pid})"/>'
+		html = html.replace(/#{pid}/g,pid);
+		$("#del-btn").append(html);
+		
+		$.ajax({
+			"url":"/project/"+pid+"/selectProject",
+			"dataType":"json",
+			"type":"get",
+			"success":function(json){
+				if(json.state==200){
+					$("#providerId").val(json.data.pronum);
+					$("#providerName").val(json.data.applicant);
+					$("#people").val(json.data.name);
+					$("#phone").val(json.data.time);
+					$("#address").val(json.data.person);
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	})
+	
+	function updateProject(pid){
+		var pronum = $("#providerId").val();
+		var applicant = $("#providerName").val();
+		var name = $("#people").val();
+		var time = $("#phone").val();
+		var person = $("#address").val();
+		if(pronum.length<1){
+			alert("项目编码不能为空");
+			return;
+		}
+		if(applicant.length<1){
+			alert("项目方不能为空");
+			return;
+		}
+		if(name.length<1){
+			alert("项目名不能为空");
+			return;
+		}
+		if(time.length<1){
+			alert("下单时间不能为空");
+			return;
+		}
+		if(person.length<1){
+			alert("负责人不能为空");
+			return;
+		}
+		$.ajax({
+			"url":"/project/"+pid+"/update",
+			"data":$("#project-update-form").serialize(),
+			"type":"post",
+			"dataType":"json",
+			"success":function(json){
+				if(json.state==200){
+					alert("修改成功");
+					location.href="projectList.html";
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+	function deleteProject(pid){
+		$.ajax({
+			"url":"/project/"+pid+"/remove",
+			"type":"post",
+			"dataType":"json",
+			"success":function(json){
+				if(json.state==200){
+					alert("删除成功");
+					location.href="projectList.html";
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+	
+	function exit(){
+		$.ajax({
+			"url":"/user/exit",
+			"datatype":"json",
+			"type":"post",
+			"success":function(json){
+				if(json.state==200){
+					location.href="login.html"
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+</script>
+</body>
+</html>

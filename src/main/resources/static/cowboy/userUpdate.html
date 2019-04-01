@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>超市账单管理系统</title>
+    <link rel="stylesheet" href="css/public.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/jquery.js"></script>	
+    <script src="../js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<!--头部-->
+<header class="publicHeader">
+    <h1>牧童仓库管理系统</h1>
+
+    <div class="publicHeaderR">
+        <p><span>下午好！</span><span style="color: #fff21b" id="span-1"></span> , 欢迎你！</p>
+        <input type="button" value="退出" onclick="exit()">
+    </div>
+</header>
+<!--时间-->
+<section class="publicTime">
+    <span id="time">2015年1月1日 11:11  星期一</span>
+</section>
+<!--主体内容-->
+<section class="publicMian ">
+    <div class="left">
+        <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+        <nav>
+            <ul class="list">
+                <li><a href="projectList.html">项目管理</a></li>
+                <li ><a href="supplierList.html">供应商管理</a></li>
+                <li id="active"><a href="userList.html">用户管理</a></li>
+                <li><a href="password.html">密码修改</a></li>
+                <li><a href="materiel.html">物料管理</a></li>
+                <li><a href="deptList.html">部门管理</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="right">
+        <div class="location">
+            <strong>你现在所在的位置是:</strong>
+            <span>用户管理页面 >> 用户修改页面</span>
+        </div>
+        <div class="providerAdd">
+            <form id="info-form">
+                <div>
+                    <label for="userName">用户姓名：</label>
+                    <input type="text" name="name" id="name"/>
+                    <span >*</span>
+                </div>
+
+                <div>
+                    <label >用户性别：</label>
+
+                    <select name="gender">
+                        <option id="man" value="1">男</option>
+                        <option id="women" value="0">女</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="data">用户邮箱：</label>
+                    <input type="text" name="email" id="email"/>
+                    <span >*</span>
+                </div>
+                <div>
+                    <label for="userphone">用户电话：</label>
+                    <input type="text" name="phone" id="phone"/>
+                    <span >*</span>
+                </div>
+
+                <div class="providerAddBtn">
+                    <!--<a href="#">保存</a>-->
+                    <!--<a href="userList.html">返回</a>-->
+                    <input type="button" value="保存" id="update-btn"/>
+                    <input type="button" value="返回" onclick="history.back(-1)"/>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</section>
+<footer class="footer">
+</footer>
+<script src="js/time.js"></script>
+<script type="text/javascript">
+	var uid = window.location.search;
+	uid = uid.split("=")[1];
+	$(document).ready(function(){
+		var username = $.cookie("username");
+		$("#span-1").html(username);
+		
+		$.ajax({
+			"url":"/user/"+uid+"/selectInfo",
+			"dataType":"json",
+			"type":"get",
+			"success":function(json){
+				if(json.state==200){
+					$("#name").val(json.data.name);
+					if(json.data.gender==0){
+						$("#women").attr("selected","selected");
+					}else{
+						$("#men").attr("selected","selected");
+					}
+					$("#email").val(json.data.email);
+					$("#phone").val(json.data.phone);
+					
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	})
+	
+	$("#update-btn").click(function(){
+		var name = $("#name").val();
+		var email = $("#email").val();
+		var phone = $("#phone").val();
+		var emailReg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
+		var phoneReg=/^[1][3,4,5,7,8][0-9]{9}$/;
+		if(name.length<2){
+			alert("姓名不能少于两位");
+			return;
+		}
+		if(!emailReg.test(email)){
+			alert("邮箱格式不正确");
+			return;
+		}
+		if(!phoneReg.test(phone)){
+			alert("手机格式不正确");
+			return;
+		}
+		$.ajax({
+			"url":"/user/"+uid+"/changeInfo",
+			"data":$("#info-form").serialize(),
+			"type":"post",
+			"dataType":"json",
+			"success":function(json){
+				if (json.state == 200) {
+					alert("修改成功！");
+					location.href="userList.html";
+				} else {
+					alert(json.message);
+				}
+			}
+		})
+	})
+	
+	function exit(){
+		$.ajax({
+			"url":"/user/exit",
+			"datatype":"json",
+			"type":"post",
+			"success":function(json){
+				if(json.state==200){
+					location.href="login.html"
+				}else{
+					alert(json.message);
+				}
+			}
+		})
+	}
+</script>
+</body>
+</html>
